@@ -1,8 +1,0 @@
-2024-11-15 23:23:52,467 DEBUG    root            Loaded Command Group: ['gcloud', 'config']
-2024-11-15 23:23:52,482 DEBUG    root            Loaded Command Group: ['gcloud', 'config', 'get_value']
-2024-11-15 23:23:52,484 DEBUG    root            Running [gcloud.config.get-value] with arguments: [SECTION/PROPERTY: "project"]
-2024-11-15 23:23:52,492 DEBUG    root            Chosen display Format:value(.)
-2024-11-15 23:23:52,493 INFO     root            Display format: "value(.)"
-2024-11-15 23:23:52,493 INFO     ___FILE_ONLY___ ancient-dna-project
-
-2024-11-15 23:23:52,494 DEBUG    root            SDK update checks are disabled.
