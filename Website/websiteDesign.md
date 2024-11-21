@@ -7,6 +7,7 @@
 # Page 2
 
 - Explanation of evolutionary theories of LP
+- Discussion about people who are lactose intolerant, yet still consume dairy
 
 # Page 3
 
