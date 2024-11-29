@@ -2,29 +2,47 @@
 
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import * as topojson from 'topojson-client'
+
+// json file from here:
+// https://github.com/topojson/world-atlas?tab=readme-ov-file
+import world from "./countries-110m.json"
 
 // Used the following tutorials when designing the d3 visualization:
 // - https://clouddevs.com/next/data-visualization-with-d3js/
+// - https://www.youtube.com/watch?v=hrJ64jpYb0A&t
+// - https://observablehq.com/@d3/world-map-svg
 
-function BarChart() {
+function AncientDnaMap() {
   const svgRef = useRef();
 
   useEffect(() => {
-    // Create an SVG container
+
+    const width = 975;
+    const height = 610;
+
+    const path = d3.geoPath(d3.geoNaturalEarth1())
     const svg = d3.select(svgRef.current)
       .append('svg')
-      .attr('width', 500)
-      .attr('height', 300);
+      .attr('width', width)
+      .attr('height', height);
 
-    // Add your chart elements here
+    const worldBackground = svg.append('path')
+      .attr('fill', '#ddd')
+      .attr('d', path(topojson.feature(world, world.objects.land)))
+
+    const worldBorders = svg.append('path')
+      .attr('fill', 'none')
+      .attr('stroke', '#fff')
+      .attr('d', path(topojson.feature(world, world.objects.countries)))
+
   }, []);
 
   return (
     <div>
-      <h2>Bar Chart</h2>
       <div ref={svgRef}></div>
     </div>
   );
 }
 
-export default BarChart;
+export default AncientDnaMap;
