@@ -34,7 +34,11 @@ function AncientDnaMap() {
     const worldBorders = svg.append('path')
       .attr('fill', 'none')
       .attr('stroke', '#fff')
+      .attr('stroke-linejoin', 'round')
+      .attr('stroke-linecap', 'round')
       .attr('d', path(topojson.feature(world, world.objects.countries)))
+
+    const ancientHumanDataElements = svg.append('g');
 
   }, []);
 
