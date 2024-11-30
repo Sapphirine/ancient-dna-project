@@ -26,6 +26,8 @@ function AncientDnaMap() {
     const width = 975;
     const height = 610;
 
+    const projection= d3.geoNaturalEarth1()
+
     const path = d3.geoPath(d3.geoNaturalEarth1())
     const svg = d3.select(svgRef.current)
       .append('svg')
@@ -46,7 +48,12 @@ function AncientDnaMap() {
     const ancientHumanDataElements = svg.selectAll('g')
       .data(ancient_human_data["elements"])
       .join('g');
-
+    
+    ancientHumanDataElements.append('g')
+      .attr('transform', d => `translate(${projection([d.Longitude, d.Latitude]).join(",")})`)
+      .append('circle')
+    .attr('r', 0.5)
+    
   }, []);
 
   return (
