@@ -8,6 +8,11 @@ import * as topojson from 'topojson-client'
 // https://github.com/topojson/world-atlas?tab=readme-ov-file
 import world from "./countries-110m.json"
 
+import ancient_human_data from "./ancientHumanData.json"
+
+console.log(ancient_human_data)
+
+
 // Used the following tutorials when designing the d3 visualization:
 // - https://clouddevs.com/next/data-visualization-with-d3js/
 // - https://www.youtube.com/watch?v=hrJ64jpYb0A&t
@@ -38,7 +43,9 @@ function AncientDnaMap() {
       .attr('stroke-linecap', 'round')
       .attr('d', path(topojson.feature(world, world.objects.countries)))
 
-    const ancientHumanDataElements = svg.append('g');
+    const ancientHumanDataElements = svg.selectAll('g')
+      .data(ancient_human_data["elements"])
+      .join('g');
 
   }, []);
 
