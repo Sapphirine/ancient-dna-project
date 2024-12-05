@@ -7,7 +7,7 @@ import ancientHumanData from "./ancientHumanData.json"
 
 // json file from here:
 // https://geojson-maps.kyd.au/
-import geoJson from "./worldMap.json"
+import geoJson from "./worldMapLowRes.json"
 
 // Used the following tutorials when designing the d3 visualization:
 // - https://clouddevs.com/next/data-visualization-with-d3js/
