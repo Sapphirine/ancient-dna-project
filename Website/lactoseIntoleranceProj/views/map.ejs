@@ -1,5 +1,8 @@
 <!-- Using the following tutorials
-- Leaflet Quickstart Tutorial - https://leafletjs.com/examples/quick-start/ -->
+- Leaflet Quickstart Tutorial - https://leafletjs.com/examples/quick-start/
+- ChatGPT - leaflet starter code
+- Leaflet Cluster Plugin Tutorial - https://leaflet.github.io/Leaflet.markercluster/#using-the-plugin
+-->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,6 +27,17 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.1.0/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.1.0/dist/MarkerCluster.Default.css"
+    />
+    <script src="https://unpkg.com/leaflet.markercluster@1.1.0/dist/leaflet.markercluster.js"></script>
+
     <style>
       #map {
         height: 400px;
@@ -32,15 +46,35 @@
   </head>
 
   <body>
+    <h1>Map</h1>
     <div id="map"></div>
     <script>
-      var map = L.map("map").setView([30, 0], 2);
+      const map = L.map("map").setView([30, 0], 2);
 
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution:
           '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
+
+      const markers = L.markerClusterGroup();
+
+      d3.json("/ancientHumanData.json")
+        .then((data) => {
+          data.elements.forEach((d) => {
+            const latitude = +d.Latitude;
+            const longitude = +d.Longitude;
+
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+              const marker = L.marker([latitude, longitude]);
+              markers.addLayer(marker);
+            }
+          });
+          map.addLayer(markers);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
