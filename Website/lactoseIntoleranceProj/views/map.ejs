@@ -100,8 +100,7 @@
       }
 
       function addPoints(snpPanelSelections) {
-        map.removeLayer(markers);
-        markers = L.markerClusterGroup();
+        newMarkers = L.markerClusterGroup();
 
         d3.json("/ancientHumanData.json")
           .then((data) => {
@@ -115,10 +114,12 @@
                 shouldAddPoint(d, snpPanelSelections)
               ) {
                 const marker = L.marker([latitude, longitude]);
-                markers.addLayer(marker);
+                newMarkers.addLayer(marker);
               }
             });
-            map.addLayer(markers);
+            map.addLayer(newMarkers);
+            map.removeLayer(markers);
+            markers = newMarkers;
           })
           .catch((error) => {
             console.error(error);
