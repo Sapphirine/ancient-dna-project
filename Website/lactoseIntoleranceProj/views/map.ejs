@@ -108,17 +108,51 @@
         });
 
       // add SNP panel
-      var items = [
-        { label: "sunny", value: "☼" },
-        { label: "half-sunny", value: "🌤" },
-        { label: "half-raining", value: "🌦" },
-        { label: "raining", value: "🌨" },
-        { label: "tornado", value: "🌪" },
+
+      function innerItems(rsid) {
+        return [
+          { label: "0 copies of reference allele", value: `${rsid}_0` },
+          { label: "1 copy of reference allele", value: `${rsid}_1` },
+          { label: "2 copies of reference allele", value: `${rsid}_2` },
+          { label: "missing data", value: `${rsid}_9` },
+        ];
+      }
+
+      const items = [
+        {
+          label: "rs4954490",
+          value: "rs4954490",
+          items: innerItems("rs4954490"),
+        },
+        {
+          label: "rs41525747",
+          value: "rs41525747",
+          items: innerItems("rs41525747"),
+        },
+        {
+          label: "rs4988235",
+          value: "rs4988235",
+          items: innerItems("rs4988235"),
+        },
+        {
+          label: "rs41380347",
+          value: "rs41380347",
+          items: innerItems("rs41380347"),
+        },
+        {
+          label: "rs145946881",
+          value: "rs145946881",
+          items: innerItems("rs145946881"),
+        },
       ];
+
       L.control
         .select({
           position: "topleft",
           items: items,
+          multi: true,
+          iconChecked: "☑",
+          iconUnchecked: "❒",
         })
         .addTo(map);
 
