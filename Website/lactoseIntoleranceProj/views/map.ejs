@@ -110,6 +110,21 @@
           console.error(error);
         });
 
+      // add SNP panel
+      var items = [
+        { label: "sunny", value: "☼" },
+        { label: "half-sunny", value: "🌤" },
+        { label: "half-raining", value: "🌦" },
+        { label: "raining", value: "🌨" },
+        { label: "tornado", value: "🌪" },
+      ];
+      L.control
+        .select({
+          position: "topleft",
+          items: items,
+        })
+        .addTo(map);
+
       // create timeline
       var slider = document.getElementById("slider");
 
