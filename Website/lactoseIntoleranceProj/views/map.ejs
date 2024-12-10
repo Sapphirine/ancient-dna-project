@@ -87,34 +87,60 @@
           '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      const markers = L.markerClusterGroup();
+      let markers = L.markerClusterGroup();
 
       // add data to the map
-      d3.json("/ancientHumanData.json")
-        .then((data) => {
-          data.elements.forEach((d) => {
-            const latitude = +d.Latitude;
-            const longitude = +d.Longitude;
+      function shouldAddPoint(point, snpPanelSelections) {
+        for (const selection of snpPanelSelections) {
+          if (+point[selection.rsid] == selection.num) {
+            return true;
+          }
+        }
+        return false;
+      }
 
-            if (!isNaN(latitude) && !isNaN(longitude)) {
-              const marker = L.marker([latitude, longitude]);
-              markers.addLayer(marker);
-            }
+      function addPoints(snpPanelSelections) {
+        map.removeLayer(markers);
+        markers = L.markerClusterGroup();
+
+        d3.json("/ancientHumanData.json")
+          .then((data) => {
+            data.elements.forEach((d) => {
+              const latitude = +d.Latitude;
+              const longitude = +d.Longitude;
+
+              if (
+                !isNaN(latitude) &&
+                !isNaN(longitude) &&
+                shouldAddPoint(d, snpPanelSelections)
+              ) {
+                const marker = L.marker([latitude, longitude]);
+                markers.addLayer(marker);
+              }
+            });
+            map.addLayer(markers);
+          })
+          .catch((error) => {
+            console.error(error);
           });
-          map.addLayer(markers);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      }
 
       // add SNP panel
-
       function innerItems(rsid) {
         return [
-          { label: "0 copies of reference allele", value: `${rsid}_0` },
-          { label: "1 copy of reference allele", value: `${rsid}_1` },
-          { label: "2 copies of reference allele", value: `${rsid}_2` },
-          { label: "missing data", value: `${rsid}_9` },
+          {
+            label: "0 copies of reference allele",
+            value: { rsid: rsid, num: 0 },
+          },
+          {
+            label: "1 copy of reference allele",
+            value: { rsid: rsid, num: 1 },
+          },
+          {
+            label: "2 copies of reference allele",
+            value: { rsid: rsid, num: 2 },
+          },
+          { label: "missing data", value: { rsid: rsid, num: 9 } },
         ];
       }
 
@@ -153,6 +179,7 @@
           multi: true,
           iconChecked: "☑",
           iconUnchecked: "❒",
+          onSelect: addPoints,
         })
         .addTo(map);
 
