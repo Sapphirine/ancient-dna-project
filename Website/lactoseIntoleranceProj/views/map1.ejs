@@ -90,7 +90,7 @@
 
     <div id="controls">
       <div>
-        <label for="year-input">Year:</label>
+        <label for="year-input">Years Ago:</label>
         <input id="year-input" type="number" value="0" />
       </div>
       <button id="set-year-btn">Set Year</button>
@@ -98,7 +98,7 @@
 
     <div id="slider-container">
       <div id="slider"></div>
-      <div id="slider-text">Year Range: 0 - 10</div>
+      <div id="slider-text">Years Ago Range: 0 - 10</div>
     </div>
 
     <script>
@@ -149,7 +149,7 @@
       };
 
       const updateSliderText = (yearRange) => {
-        sliderText.textContent = `Year Range: ${yearRange[0]} - ${yearRange[1]}`;
+        sliderText.textContent = `Years Ago Range: ${yearRange[0]} - ${yearRange[1]}`;
       };
 
       slider.noUiSlider.on("update", (values) => {
