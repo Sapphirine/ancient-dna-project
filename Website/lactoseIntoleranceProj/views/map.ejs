@@ -67,7 +67,7 @@
       }
 
       #slider {
-        margin-top: 100px;
+        margin-top: 50px;
       }
     </style>
   </head>
@@ -75,9 +75,23 @@
   <body>
     <h1>Map</h1>
     <div id="map"></div>
-    <div id="slider"></div>
+    <div id="controls">
+      <div>
+        <label for="year-input">Years Ago:</label>
+        <input id="year-input" type="number" value="0" />
+      </div>
+      <button id="set-year-btn">Set Year</button>
+    </div>
+
+    <div id="slider-container">
+      <div id="slider"></div>
+      <div id="slider-text">Years Ago Range: 0 - 10</div>
+    </div>
 
     <script>
+      let snpPanelSelections = [];
+      let yearRange = [];
+
       // create map
       const map = L.map("map").setView([30, 0], 2);
 
@@ -99,7 +113,7 @@
         return false;
       }
 
-      function addPoints(snpPanelSelections) {
+      function addPoints() {
         newMarkers = L.markerClusterGroup();
 
         d3.json("/ancientHumanData.json")
@@ -107,11 +121,14 @@
             data.elements.forEach((d) => {
               const latitude = +d.Latitude;
               const longitude = +d.Longitude;
+              const meanData = +d["Mean Date"];
 
               if (
                 !isNaN(latitude) &&
                 !isNaN(longitude) &&
-                shouldAddPoint(d, snpPanelSelections)
+                shouldAddPoint(d, snpPanelSelections) &&
+                meanData >= yearRange[0] &&
+                meanData <= yearRange[1]
               ) {
                 const marker = L.marker([latitude, longitude]);
                 newMarkers.addLayer(marker);
@@ -180,21 +197,47 @@
           multi: true,
           iconChecked: "☑",
           iconUnchecked: "❒",
-          onSelect: addPoints,
+          onSelect: (selections) => {
+            snpPanelSelections = selections;
+            addPoints();
+          },
         })
         .addTo(map);
 
-      // create timeline
-      var slider = document.getElementById("slider");
+      // create timeline controls
+
+      const yearInput = document.getElementById("year-input");
+      const setYearButton = document.getElementById("set-year-btn");
+      const sliderText = document.getElementById("slider-text");
+      const slider = document.getElementById("slider");
 
       noUiSlider.create(slider, {
-        start: [20, 80],
+        start: [0, 10],
         connect: true,
+        behaviour: "drag",
         range: {
           min: 0,
-          max: 100,
+          max: 15000,
         },
+        step: 1,
       });
+
+      const updateSliderText = (yearRange) => {
+        sliderText.textContent = `Years Ago Range: ${yearRange[0]} - ${yearRange[1]}`;
+      };
+
+      slider.noUiSlider.on("end", (values) => {
+        yearRange = values.map((v) => Math.round(+v));
+        addPoints();
+        updateSliderText(yearRange);
+      });
+
+      const setYear = () => {
+        const selectedYear = +yearInput.value;
+        slider.noUiSlider.set([selectedYear, selectedYear]);
+      };
+
+      setYearButton.addEventListener("click", setYear);
     </script>
   </body>
 </html>
