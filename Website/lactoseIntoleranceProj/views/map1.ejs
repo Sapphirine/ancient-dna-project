@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interactive Timeline Map</title>
+    <title>Map</title>
+
+    <!-- leaflet -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -15,12 +17,21 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
+
+    <!-- bootstrap -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- leaflet cluster -->
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <link
       rel="stylesheet"
@@ -31,63 +42,32 @@
       href="https://unpkg.com/leaflet.markercluster@1.1.0/dist/MarkerCluster.Default.css"
     />
     <script src="https://unpkg.com/leaflet.markercluster@1.1.0/dist/leaflet.markercluster.js"></script>
+
+    <!-- nouislider -->
     <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.css"
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/nouislider@15.6.0/dist/nouislider.min.css"
     />
-    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.6.0/dist/nouislider.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.js"></script>
+
+    <!-- leaflet control select -->
+    <link href="/leaflet.control.select.css" rel="stylesheet" />
+    <script src="/leaflet.control.select.src.js"></script>
 
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(120deg, #0079bf, #28c76f);
-        color: white;
-        margin: 0;
-        padding: 0;
-      }
-      h1 {
-        text-align: center;
-        padding: 20px;
-        font-size: 2.5rem;
-        color: #f9f9f9;
-      }
       #map {
         height: 400px;
-        margin: 20px auto;
-        max-width: 90%;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       }
-      #controls {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin: 20px 0;
-      }
-      #slider-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 20px 0;
-      }
+
       #slider {
-        width: 80%;
-        margin: 20px auto;
-      }
-      #slider-text {
-        font-weight: bold;
-        text-align: center;
-        margin-top: 10px;
-        color: #f1faee;
-        font-size: 1.2rem;
+        margin-top: 50px;
       }
     </style>
   </head>
 
   <body>
-    <h1>Interactive Timeline Map</h1>
+    <h1>Map</h1>
     <div id="map"></div>
-
     <div id="controls">
       <div>
         <label for="year-input">Years Ago:</label>
@@ -102,6 +82,10 @@
     </div>
 
     <script>
+      let snpPanelSelections = [];
+      let yearRange = [];
+
+      // create map
       const map = L.map("map").setView([30, 0], 2);
 
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -110,82 +94,174 @@
           '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      const markers = L.markerClusterGroup();
-      let sliderData = [];
-      const yearInput = document.getElementById("year-input");
-      const setYearButton = document.getElementById("set-year-btn");
-      const sliderText = document.getElementById("slider-text");
+      let markers = L.markerClusterGroup();
 
-      const slider = document.getElementById("slider");
+      async function initializeSlider() {
+        try {
+          const data = await d3.json("/ancientHumanData.json");
 
-      // Initialize noUiSlider
-      noUiSlider.create(slider, {
-        start: [0, 10],
-        connect: true,
-        range: {
-          min: 0,
-          max: 100,
-        },
-        step: 1,
-      });
+          // Calculate the min and max of Mean Date
+          const meanDates = data.elements.map((d) => +d["Mean Date"]).filter((d) => !isNaN(d));
+          const minDate = Math.min(...meanDates);
+          const maxDate = Math.max(...meanDates);
 
-      const updateMarkers = (yearRange) => {
-        markers.clearLayers();
-        sliderData
-          .filter(
-            (d) => d["Mean Date"] >= yearRange[0] && d["Mean Date"] <= yearRange[1]
-          )
-          .forEach((d) => {
-            const latitude = +d.Latitude;
-            const longitude = +d.Longitude;
-            if (!isNaN(latitude) && !isNaN(longitude)) {
-              const marker = L.marker([latitude, longitude]).bindPopup(
-                `Year: ${d["Mean Date"]}`
-              );
-              markers.addLayer(marker);
-            }
+          // Initialize the slider with the calculated range
+          const slider = document.getElementById("slider");
+          noUiSlider.create(slider, {
+            start: [minDate, maxDate],
+            connect: true,
+            behaviour: "drag",
+            range: {
+              min: minDate,
+              max: maxDate,
+            },
+            step: 1,
           });
-        map.addLayer(markers);
-      };
+
+          yearRange = [minDate, maxDate];
+          updateSliderText(yearRange);
+
+          slider.noUiSlider.on("set", (values, handle) => {
+            const newYearRange = values.map((v) => Math.round(+v));
+            if (
+              newYearRange[0] === yearRange[0] &&
+              newYearRange[1] === yearRange[1]
+            ) {
+              return;
+            }
+            yearRange = newYearRange;
+
+            addPoints();
+            updateSliderText(yearRange);
+          });
+        } catch (error) {
+          console.error("Error fetching data for slider initialization:", error);
+        }
+      }
 
       const updateSliderText = (yearRange) => {
+        const sliderText = document.getElementById("slider-text");
         sliderText.textContent = `Years Ago Range: ${yearRange[0]} - ${yearRange[1]}`;
       };
 
-      slider.noUiSlider.on("update", (values) => {
-        const yearRange = values.map((v) => Math.round(+v));
-        updateMarkers(yearRange);
-        updateSliderText(yearRange);
-      });
+      function shouldAddPoint(point, snpPanelSelections) {
+        for (const selection of snpPanelSelections) {
+          if (+point[selection.rsid] == selection.num) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function addPoints() {
+        let newMarkers = L.markerClusterGroup();
+
+        d3.json("/ancientHumanData.json")
+          .then((data) => {
+            data.elements.forEach((d) => {
+              const latitude = +d.Latitude;
+              const longitude = +d.Longitude;
+              const meanDate = +d["Mean Date"];
+
+              if (
+                !isNaN(latitude) &&
+                !isNaN(longitude) &&
+                shouldAddPoint(d, snpPanelSelections) &&
+                meanDate >= yearRange[0] &&
+                meanDate <= yearRange[1]
+              ) {
+                const marker = L.marker([latitude, longitude]);
+                marker.on("click", () => {
+                  const popupContent = `
+                    <b>Age at Death:</b> ${d["Age at Death"] || "N/A"}<br>
+                    <b>Political Entity:</b> ${d["Political Entity"] || "N/A"}<br>
+                    <b>Mean Date:</b> ${meanDate}`;
+                  marker.bindPopup(popupContent).openPopup();
+                });
+                newMarkers.addLayer(marker);
+              }
+            });
+            map.addLayer(newMarkers);
+            map.removeLayer(markers);
+            markers = newMarkers;
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+
+      function innerItems(rsid) {
+        return [
+          {
+            label: "0 copies of reference allele",
+            value: { rsid: rsid, num: 0 },
+          },
+          {
+            label: "1 copy of reference allele",
+            value: { rsid: rsid, num: 1 },
+          },
+          {
+            label: "2 copies of reference allele",
+            value: { rsid: rsid, num: 2 },
+          },
+          { label: "missing data", value: { rsid: rsid, num: 9 } },
+        ];
+      }
+
+      const items = [
+        {
+          label: "rs4954490",
+          value: "rs4954490",
+          items: innerItems("rs4954490"),
+        },
+        {
+          label: "rs41525747",
+          value: "rs41525747",
+          items: innerItems("rs41525747"),
+        },
+        {
+          label: "rs4988235",
+          value: "rs4988235",
+          items: innerItems("rs4988235"),
+        },
+        {
+          label: "rs41380347",
+          value: "rs41380347",
+          items: innerItems("rs41380347"),
+        },
+        {
+          label: "rs145946881",
+          value: "rs145946881",
+          items: innerItems("rs145946881"),
+        },
+      ];
+
+      L.control
+        .select({
+          position: "topleft",
+          items: items,
+          multi: true,
+          iconChecked: "☑",
+          iconUnchecked: "❒",
+          onSelect: (selections) => {
+            snpPanelSelections = selections;
+            addPoints();
+          },
+        })
+        .addTo(map);
+
+      const yearInput = document.getElementById("year-input");
+      const setYearButton = document.getElementById("set-year-btn");
 
       const setYear = () => {
         const selectedYear = +yearInput.value;
+        const slider = document.getElementById("slider");
         slider.noUiSlider.set([selectedYear, selectedYear]);
       };
 
-      d3.json("/ancientHumanData.json")
-        .then((data) => {
-          sliderData = data.elements;
-
-          const dataMinYear = d3.min(sliderData, (d) => d["Mean Date"]);
-          const dataMaxYear = d3.max(sliderData, (d) => d["Mean Date"]);
-
-          yearInput.value = dataMinYear;
-
-          slider.noUiSlider.updateOptions({
-            range: {
-              min: dataMinYear,
-              max: dataMaxYear,
-            },
-            start: [dataMinYear, dataMinYear + 1],
-          });
-
-          updateMarkers([dataMinYear, dataMinYear + 1]);
-          updateSliderText([dataMinYear, dataMinYear + 1]);
-        })
-        .catch((err) => console.error("Error loading JSON:", err));
-
       setYearButton.addEventListener("click", setYear);
+
+      initializeSlider();
     </script>
   </body>
 </html>
