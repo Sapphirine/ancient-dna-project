@@ -226,8 +226,17 @@
         sliderText.textContent = `Years Ago Range: ${yearRange[0]} - ${yearRange[1]}`;
       };
 
-      slider.noUiSlider.on("end", (values) => {
-        yearRange = values.map((v) => Math.round(+v));
+      slider.noUiSlider.on("set", (values, handle) => {
+        // prevent duplicate addPoints() calls
+        newYearRange = values.map((v) => Math.round(+v));
+        if (
+          newYearRange[0] == yearRange[0] &&
+          newYearRange[1] == yearRange[1]
+        ) {
+          return;
+        }
+        yearRange = newYearRange;
+
         addPoints();
         updateSliderText(yearRange);
       });
