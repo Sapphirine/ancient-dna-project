@@ -194,6 +194,7 @@
               const latitude = +d.Latitude;
               const longitude = +d.Longitude;
               const meanDate = +d["Mean Date"];
+              const groupId = d["Group ID"] || "N/A"; // Updated line
 
               if (
                 !isNaN(latitude) &&
@@ -205,7 +206,7 @@
                 const marker = L.marker([latitude, longitude]);
                 marker.on("click", () => {
                   const popupContent = `
-                    <b>Age at Death:</b> ${d["Age at Death"] || "N/A"}<br>
+                    <b>Group ID:</b> ${groupId}<br>
                     <b>Political Entity:</b> ${d["Political Entity"] || "N/A"}<br>
                     <b>Mean Date:</b> ${meanDate}`;
                   marker
@@ -300,4 +301,3 @@
     </script>
   </body>
 </html>
-
