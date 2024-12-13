@@ -62,6 +62,17 @@
       #slider {
         margin-top: 50px;
       }
+
+      #scale {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        margin-top: 10px;
+      }
+
+      #scale span {
+        transform: translateY(-10px);
+      }
     </style>
   </head>
 
@@ -78,6 +89,7 @@
 
     <div id="slider-container">
       <div id="slider"></div>
+      <div id="scale"></div>
       <div id="slider-text">Years Ago Range: 0 - 10</div>
     </div>
 
@@ -101,7 +113,9 @@
           const data = await d3.json("/ancientHumanData.json");
 
           // Calculate the min and max of Mean Date
-          const meanDates = data.elements.map((d) => +d["Mean Date"]).filter((d) => !isNaN(d));
+          const meanDates = data.elements
+            .map((d) => +d["Mean Date"])
+            .filter((d) => !isNaN(d));
           const minDate = Math.min(...meanDates);
           const maxDate = Math.max(...meanDates);
 
@@ -120,6 +134,9 @@
 
           yearRange = [minDate, maxDate];
           updateSliderText(yearRange);
+
+          // Create the scale below the slider
+          createScale(minDate, maxDate);
 
           slider.noUiSlider.on("set", (values, handle) => {
             const newYearRange = values.map((v) => Math.round(+v));
@@ -142,6 +159,21 @@
       const updateSliderText = (yearRange) => {
         const sliderText = document.getElementById("slider-text");
         sliderText.textContent = `Years Ago Range: ${yearRange[0]} - ${yearRange[1]}`;
+      };
+
+      const createScale = (minDate, maxDate) => {
+        const scale = document.getElementById("scale");
+        scale.innerHTML = ""; // Clear any existing scale elements
+
+        const numTicks = 10; // Define the number of ticks for the scale
+        const tickInterval = (maxDate - minDate) / (numTicks - 1);
+
+        for (let i = 0; i < numTicks; i++) {
+          const tickValue = Math.round(minDate + i * tickInterval);
+          const tick = document.createElement("span");
+          tick.textContent = tickValue;
+          scale.appendChild(tick);
+        }
       };
 
       function shouldAddPoint(point, snpPanelSelections) {
@@ -176,7 +208,10 @@
                     <b>Age at Death:</b> ${d["Age at Death"] || "N/A"}<br>
                     <b>Political Entity:</b> ${d["Political Entity"] || "N/A"}<br>
                     <b>Mean Date:</b> ${meanDate}`;
-                  marker.bindPopup(popupContent).openPopup();
+                  marker
+                    .unbindPopup()
+                    .bindPopup(popupContent)
+                    .openPopup();
                 });
                 newMarkers.addLayer(marker);
               }
@@ -265,3 +300,4 @@
     </script>
   </body>
 </html>
+
