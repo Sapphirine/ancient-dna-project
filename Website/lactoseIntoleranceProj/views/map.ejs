@@ -64,26 +64,46 @@
     <style>
       #map {
         height: 400px;
+        width: 100%;
       }
 
       #slider {
-        margin-top: 50px;
+        width: 100%;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      #controls {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
       }
     </style>
   </head>
 
   <body>
-    <h1>Map</h1>
-    <div id="map"></div>
-    <div id="controls">
-      <div>
-        <label for="year-input">Years Ago:</label>
-        <input id="year-input" type="number" value="0" />
+    <div class="container mt-3">
+      <h1>Map</h1>
+      <div id="map"></div>
+      <div id="controls">
+        <div class="input-group">
+          <span class="input-group-text">Years Ago</span>
+          <input id="year-input" type="number" class="form-control" value="0" />
+        </div>
+        <button
+          id="set-year-btn"
+          type="button"
+          class="btn btn-primary text-nowrap ms-4"
+        >
+          Set Year
+        </button>
       </div>
-      <button id="set-year-btn">Set Year</button>
-    </div>
 
-    <div id="slider-container">
       <div id="slider"></div>
       <div id="slider-text">Years Ago Range: 0 - 10</div>
     </div>
