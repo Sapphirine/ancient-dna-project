@@ -1,8 +1,9 @@
 <!-- Using the following tutorials
 - Leaflet Quickstart Tutorial - https://leafletjs.com/examples/quick-start/
-- ChatGPT - leaflet starter code
 - Leaflet Cluster Plugin Tutorial - https://leaflet.github.io/Leaflet.markercluster/#using-the-plugin
 - Leaflet Control Select Tutorial - https://github.com/adammertel/Leaflet.Control.Select
+- NoUiSlider Tutorial - https://refreshless.com/nouislider/
+- ChatGPT - helped with finding useful libraries; generated starter code; helped with debugging
 -->
 
 <!DOCTYPE html>
@@ -105,12 +106,13 @@
       </div>
 
       <div id="slider"></div>
-      <div id="slider-text">Years Ago Range: 0 - 10</div>
+      <p id="slider-text" class="mt-5"><b>Years Ago Range:</b> 0 - 10</p>
     </div>
 
     <script>
-      let snpPanelSelections = [];
-      let yearRange = [];
+      // starting settings
+      let snpPanelSelections = [{ num: 2, rsid: "rs4954490" }];
+      let yearRange = [41625, 69375];
 
       // create map
       const map = L.map("map").setView([30, 0], 2);
@@ -135,6 +137,8 @@
 
       function addPoints() {
         newMarkers = L.markerClusterGroup();
+
+        console.log(snpPanelSelections);
 
         d3.json("/ancientHumanData.json")
           .then((data) => {
@@ -162,6 +166,8 @@
             console.error(error);
           });
       }
+
+      addPoints();
 
       // add SNP panel
       function innerItems(rsid) {
@@ -232,19 +238,26 @@
       const slider = document.getElementById("slider");
 
       noUiSlider.create(slider, {
-        start: [0, 10],
+        start: [41625, 69375],
         connect: true,
         behaviour: "drag",
         range: {
           min: 0,
-          max: 15000,
+          max: 111000,
+        },
+        pips: {
+          mode: "count",
+          values: 9,
+          density: 3,
         },
         step: 1,
       });
 
       const updateSliderText = (yearRange) => {
-        sliderText.textContent = `Years Ago Range: ${yearRange[0]} - ${yearRange[1]}`;
+        sliderText.innerHTML = `<b>Years Ago Range:</b> ${yearRange[0]} - ${yearRange[1]}`;
       };
+
+      updateSliderText(yearRange);
 
       slider.noUiSlider.on("set", (values, handle) => {
         // prevent duplicate addPoints() calls
