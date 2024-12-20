@@ -28,10 +28,16 @@
         box-shadow: none;
         border-color: rgba(0, 0, 0, 0.125);
       }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
     </style>
   </head>
   <body>
-    <div class="container mt-3">
+    <div class="container mt-3 mb-3">
       <h1>Genetics of Lactose Intolerance</h1>
       <p>
         Onwards! You now should have a good understanding of how lactose
@@ -138,8 +144,13 @@
       <a
         href="https://genome.ucsc.edu/training/education/lactase.html"
         target="_blank"
-        ><img class="mt-4" src="/ucsc_article.png"
+        ><img class="mt-4 mb-4" src="/ucsc_article.png"
       /></a>
+
+      <div>
+        <a href="/" class="btn btn-primary">Previous Page</a>
+        <a href="/" class="btn btn-primary">Next Page</a>
+      </div>
     </div>
   </body>
 </html>
