@@ -93,8 +93,22 @@
       <div id="map"></div>
       <div id="controls">
         <div class="input-group">
-          <span class="input-group-text">Years Ago</span>
-          <input id="year-input" type="number" class="form-control" value="0" />
+          <span class="input-group-text">Start Year</span>
+          <input
+            id="start-year-input"
+            type="number"
+            class="form-control"
+            value="0"
+          />
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">End Year</span>
+          <input
+            id="end-year-input"
+            type="number"
+            class="form-control"
+            value="111000"
+          />
         </div>
         <button
           id="set-year-btn"
@@ -244,7 +258,8 @@
 
       // create timeline controls
 
-      const yearInput = document.getElementById("year-input");
+      const startYearInput = document.getElementById("start-year-input");
+      const endYearInput = document.getElementById("end-year-input");
       const setYearButton = document.getElementById("set-year-btn");
       const sliderText = document.getElementById("slider-text");
       const slider = document.getElementById("slider");
@@ -286,12 +301,13 @@
         updateSliderText(yearRange);
       });
 
-      const setYear = () => {
-        const selectedYear = +yearInput.value;
-        slider.noUiSlider.set([selectedYear, selectedYear]);
+      const setYearRange = () => {
+        const startYear = +startYearInput.value;
+        const endYear = +endYearInput.value;
+        slider.noUiSlider.set([startYear, endYear]);
       };
 
-      setYearButton.addEventListener("click", setYear);
+      setYearButton.addEventListener("click", setYearRange);
     </script>
   </body>
 </html>

@@ -24,8 +24,4 @@ app.get("/map", (req, res) => {
   res.render("map");
 });
 
-app.get("/map1", (req, res) => {
-  res.render("map1");
-});
-
 app.listen(5000);
