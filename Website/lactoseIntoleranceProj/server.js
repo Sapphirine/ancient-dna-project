@@ -16,6 +16,10 @@ app.get("/genetics", (req, res) => {
   res.render("genetics");
 });
 
+app.get("/ancientDNA", (req, res) => {
+  res.render("ancientDNA");
+});
+
 app.get("/map", (req, res) => {
   res.render("map");
 });
