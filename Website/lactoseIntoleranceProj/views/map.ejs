@@ -146,7 +146,6 @@
               const latitude = +d.Latitude;
               const longitude = +d.Longitude;
               const meanDate = +d["Mean Date"];
-              const groupId = d["Group ID"] || "N/A";
 
               if (
                 !isNaN(latitude) &&
@@ -158,11 +157,14 @@
                 const marker = L.marker([latitude, longitude]);
                 marker.on("click", () => {
                   const popupContent = `
-                    <b>Group ID:</b> ${groupId}<br>
-                    <b>Political Entity:</b> ${
-                      d["Political Entity"] || "N/A"
-                    }<br>
-                    <b>Mean Date:</b> ${meanDate}`;
+                    <b>Master ID:</b> ${d["Master ID"]}<br>
+                    <b>Political Entity:</b> ${d["Political Entity"]}<br>
+                    <b>Locality:</b> ${d["Locality"]}<br>
+                    <b>Years Ago:</b> ${meanDate}<br>
+                    <b>Skeletal Element:</b> ${d["Skeletal element"]}<br>
+                    <b>Age at Death:</b> ${d["Age at death"]}<br>
+                    <b>DOI:</b> ${d["doi"]}
+                    `;
                   marker.unbindPopup().bindPopup(popupContent).openPopup();
                 });
                 newMarkers.addLayer(marker);
