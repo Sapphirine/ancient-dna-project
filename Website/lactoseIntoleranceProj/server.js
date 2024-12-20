@@ -12,6 +12,10 @@ app.get("/", (req, res) => {
   res.render("introduction");
 });
 
+app.get("/genetics", (req, res) => {
+  res.render("genetics");
+});
+
 app.get("/map", (req, res) => {
   res.render("map");
 });
