@@ -57,45 +57,59 @@
     <style>
       #map {
         height: 400px;
+        width: 100%;
       }
 
       #slider {
-        margin-top: 50px;
+        width: 100%;
       }
 
-      #scale {
+      .container {
         display: flex;
-        justify-content: space-between;
-        font-size: 0.9rem;
-        margin-top: 10px;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
       }
 
-      #scale span {
-        transform: translateY(-10px);
+      #controls {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
       }
     </style>
   </head>
 
   <body>
-    <h1>Map</h1>
-    <div id="map"></div>
-    <div id="controls">
-      <div>
-        <label for="year-input">Years Ago:</label>
-        <input id="year-input" type="number" value="0" />
+    <div class="container mt-3">
+      <h1>Ancient Humans Map</h1>
+      <div id="map"></div>
+      <div id="controls">
+        <div class="input-group">
+          <span class="input-group-text">Start Year</span>
+          <input id="start-year-input" type="number" class="form-control" value="0" />
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">End Year</span>
+          <input id="end-year-input" type="number" class="form-control" value="111000" />
+        </div>
+        <button
+          id="set-year-btn"
+          type="button"
+          class="btn btn-primary text-nowrap ms-4"
+        >
+          Set Range
+        </button>
       </div>
-      <button id="set-year-btn">Set Year</button>
-    </div>
 
-    <div id="slider-container">
       <div id="slider"></div>
-      <div id="scale"></div>
-      <div id="slider-text">Years Ago Range: 0 - 10</div>
+      <p id="slider-text" class="mt-5"><b>Years Ago Range:</b> 0 - 10</p>
     </div>
 
     <script>
-      let snpPanelSelections = [];
-      let yearRange = [];
+      // starting settings
+      let snpPanelSelections = [{ num: 2, rsid: "rs4954490" }];
+      let yearRange = [41625, 69375];
 
       // create map
       const map = L.map("map").setView([30, 0], 2);
@@ -108,74 +122,7 @@
 
       let markers = L.markerClusterGroup();
 
-      async function initializeSlider() {
-        try {
-          const data = await d3.json("/ancientHumanData.json");
-
-          // Calculate the min and max of Mean Date
-          const meanDates = data.elements
-            .map((d) => +d["Mean Date"])
-            .filter((d) => !isNaN(d));
-          const minDate = Math.min(...meanDates);
-          const maxDate = Math.max(...meanDates);
-
-          // Initialize the slider with the calculated range
-          const slider = document.getElementById("slider");
-          noUiSlider.create(slider, {
-            start: [minDate, maxDate],
-            connect: true,
-            behaviour: "drag",
-            range: {
-              min: minDate,
-              max: maxDate,
-            },
-            step: 1,
-          });
-
-          yearRange = [minDate, maxDate];
-          updateSliderText(yearRange);
-
-          // Create the scale below the slider
-          createScale(minDate, maxDate);
-
-          slider.noUiSlider.on("set", (values, handle) => {
-            const newYearRange = values.map((v) => Math.round(+v));
-            if (
-              newYearRange[0] === yearRange[0] &&
-              newYearRange[1] === yearRange[1]
-            ) {
-              return;
-            }
-            yearRange = newYearRange;
-
-            addPoints();
-            updateSliderText(yearRange);
-          });
-        } catch (error) {
-          console.error("Error fetching data for slider initialization:", error);
-        }
-      }
-
-      const updateSliderText = (yearRange) => {
-        const sliderText = document.getElementById("slider-text");
-        sliderText.textContent = `Years Ago Range: ${yearRange[0]} - ${yearRange[1]}`;
-      };
-
-      const createScale = (minDate, maxDate) => {
-        const scale = document.getElementById("scale");
-        scale.innerHTML = ""; // Clear any existing scale elements
-
-        const numTicks = 10; // Define the number of ticks for the scale
-        const tickInterval = (maxDate - minDate) / (numTicks - 1);
-
-        for (let i = 0; i < numTicks; i++) {
-          const tickValue = Math.round(minDate + i * tickInterval);
-          const tick = document.createElement("span");
-          tick.textContent = tickValue;
-          scale.appendChild(tick);
-        }
-      };
-
+      // add data to the map
       function shouldAddPoint(point, snpPanelSelections) {
         for (const selection of snpPanelSelections) {
           if (+point[selection.rsid] == selection.num) {
@@ -186,7 +133,9 @@
       }
 
       function addPoints() {
-        let newMarkers = L.markerClusterGroup();
+        newMarkers = L.markerClusterGroup();
+
+        console.log(snpPanelSelections);
 
         d3.json("/ancientHumanData.json")
           .then((data) => {
@@ -194,7 +143,6 @@
               const latitude = +d.Latitude;
               const longitude = +d.Longitude;
               const meanDate = +d["Mean Date"];
-              const groupId = d["Group ID"] || "N/A"; // Updated line
 
               if (
                 !isNaN(latitude) &&
@@ -206,13 +154,15 @@
                 const marker = L.marker([latitude, longitude]);
                 marker.on("click", () => {
                   const popupContent = `
-                    <b>Group ID:</b> ${groupId}<br>
-                    <b>Political Entity:</b> ${d["Political Entity"] || "N/A"}<br>
-                    <b>Mean Date:</b> ${meanDate}`;
-                  marker
-                    .unbindPopup()
-                    .bindPopup(popupContent)
-                    .openPopup();
+                    <b>Master ID:</b> ${d["Master ID"]}<br>
+                    <b>Political Entity:</b> ${d["Political Entity"]}<br>
+                    <b>Locality:</b> ${d["Locality"]}<br>
+                    <b>Years Ago:</b> ${meanDate}<br>
+                    <b>Skeletal Element:</b> ${d["Skeletal element"]}<br>
+                    <b>Age at Death:</b> ${d["Age at death"]}<br>
+                    <b>DOI:</b> ${d["doi"]}
+                    `;
+                  marker.unbindPopup().bindPopup(popupContent).openPopup();
                 });
                 newMarkers.addLayer(marker);
               }
@@ -226,6 +176,9 @@
           });
       }
 
+      addPoints();
+
+      // add SNP panel
       function innerItems(rsid) {
         return [
           {
@@ -286,18 +239,57 @@
         })
         .addTo(map);
 
-      const yearInput = document.getElementById("year-input");
-      const setYearButton = document.getElementById("set-year-btn");
+      // create timeline controls
 
-      const setYear = () => {
-        const selectedYear = +yearInput.value;
-        const slider = document.getElementById("slider");
-        slider.noUiSlider.set([selectedYear, selectedYear]);
+      const startYearInput = document.getElementById("start-year-input");
+      const endYearInput = document.getElementById("end-year-input");
+      const setYearButton = document.getElementById("set-year-btn");
+      const sliderText = document.getElementById("slider-text");
+      const slider = document.getElementById("slider");
+
+      noUiSlider.create(slider, {
+        start: [41625, 69375],
+        connect: true,
+        behaviour: "drag",
+        range: {
+          min: 0,
+          max: 111000,
+        },
+        pips: {
+          mode: "count",
+          values: 9,
+          density: 3,
+        },
+        step: 1,
+      });
+
+      const updateSliderText = (yearRange) => {
+        sliderText.innerHTML = `<b>Years Ago Range:</b> ${yearRange[0]} - ${yearRange[1]}`;
       };
 
-      setYearButton.addEventListener("click", setYear);
+      updateSliderText(yearRange);
 
-      initializeSlider();
+      slider.noUiSlider.on("set", (values, handle) => {
+        newYearRange = values.map((v) => Math.round(+v));
+        if (
+          newYearRange[0] == yearRange[0] &&
+          newYearRange[1] == yearRange[1]
+        ) {
+          return;
+        }
+        yearRange = newYearRange;
+
+        addPoints();
+        updateSliderText(yearRange);
+      });
+
+      const setYearRange = () => {
+        const startYear = +startYearInput.value;
+        const endYear = +endYearInput.value;
+        slider.noUiSlider.set([startYear, endYear]);
+      };
+
+      setYearButton.addEventListener("click", setYearRange);
     </script>
   </body>
 </html>
