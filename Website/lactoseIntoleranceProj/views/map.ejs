@@ -145,16 +145,26 @@
             data.elements.forEach((d) => {
               const latitude = +d.Latitude;
               const longitude = +d.Longitude;
-              const meanData = +d["Mean Date"];
+              const meanDate = +d["Mean Date"];
+              const groupId = d["Group ID"] || "N/A";
 
               if (
                 !isNaN(latitude) &&
                 !isNaN(longitude) &&
                 shouldAddPoint(d, snpPanelSelections) &&
-                meanData >= yearRange[0] &&
-                meanData <= yearRange[1]
+                meanDate >= yearRange[0] &&
+                meanDate <= yearRange[1]
               ) {
                 const marker = L.marker([latitude, longitude]);
+                marker.on("click", () => {
+                  const popupContent = `
+                    <b>Group ID:</b> ${groupId}<br>
+                    <b>Political Entity:</b> ${
+                      d["Political Entity"] || "N/A"
+                    }<br>
+                    <b>Mean Date:</b> ${meanDate}`;
+                  marker.unbindPopup().bindPopup(popupContent).openPopup();
+                });
                 newMarkers.addLayer(marker);
               }
             });
