@@ -1,1 +1,1 @@
-web: npm run devStart --prefix .\Website\lactoseIntoleranceProj\
+web: node server.js
