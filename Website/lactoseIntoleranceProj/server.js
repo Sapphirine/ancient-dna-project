@@ -24,6 +24,10 @@ app.get("/map", (req, res) => {
   res.render("map");
 });
 
+app.get("/conclusion", (req, res) => {
+  res.render("conclusion");
+});
+
 let port = process.env.PORT;
 if (port == null || port == "") {
   port = 5000;
